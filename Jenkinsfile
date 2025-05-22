@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/your-org/your-repo.git'  // Replace with actual repo
+                git 'https://github.com/priyabratakhandual/kubernetes-deployment.git'  // Replace with actual repo
             }
         }
 
