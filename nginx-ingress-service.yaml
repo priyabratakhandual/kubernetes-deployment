@@ -1,44 +1,20 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Service
 metadata:
   name: ingress-nginx-controller
   namespace: ingress-nginx
-  labels:
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/name: ingress-nginx
 spec:
-  replicas: 1
+  type: NodePort
   selector:
-    matchLabels:
-      app.kubernetes.io/component: controller
-      app.kubernetes.io/name: ingress-nginx
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/component: controller
-        app.kubernetes.io/name: ingress-nginx
-    spec:
-      serviceAccountName: ingress-nginx
-      nodeSelector:
-        kubernetes.io/hostname: worker-node  # 🔁 Replace if your worker node name is different
-      containers:
-        - name: controller
-          image: registry.k8s.io/ingress-nginx/controller:v1.10.1
-          args:
-            - /nginx-ingress-controller
-            - --controller-class=nginx
-            - --ingress-class=nginx
-            - --election-id=ingress-controller-leader
-            - --watch-namespace=ingress-nginx
-          env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-          ports:
-            - containerPort: 80
-            - containerPort: 443
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/version: v2  # Must match deployment pod labels
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: 31080
+    - name: https
+      port: 443
+      targetPort: 443
+      nodePort: 31443

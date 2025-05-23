@@ -1,29 +1,47 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ingress-nginx-controller
+  name: ingress-nginx-controller-v2  # Renamed
   namespace: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/version: v2  # Added version tag
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/version: v2  # Must match pod template labels
   template:
     metadata:
       labels:
         app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/version: v2
     spec:
       nodeSelector:
-        kubernetes.io/hostname: worker-node  # make sure this matches your actual node name
+        kubernetes.io/hostname: worker-node
+      serviceAccountName: ingress-nginx
       containers:
         - name: controller
           image: registry.k8s.io/ingress-nginx/controller:v1.10.1
           args:
             - /nginx-ingress-controller
             - --election-id=ingress-controller-leader
-            - --controller-class=k8s.io/ingress-nginx
+            - --controller-class=nginx
+            - --ingress-class=nginx
+            - --watch-namespace=ingress-nginx
           ports:
             - containerPort: 80
             - containerPort: 443
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
