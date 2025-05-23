@@ -8,12 +8,22 @@ pipeline {
             }
         }
 
+        stage('Install Ingress NGINX on Worker') {
+            steps {
+                script {
+                    sh 'kubectl create namespace ingress-nginx || true'
+                    sh 'kubectl apply -f nginx-ingress-deployment.yaml'
+                    sh 'kubectl apply -f nginx-ingress-service.yaml'
+                }
+            }
+        }
+
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh "kubectl apply -f gym-deployment.yaml"
-                    sh "kubectl apply -f gym-service.yaml"
-                    sh "kubectl apply -f gym-ingress.yaml"
+                    sh 'kubectl apply -f gym-deployment.yaml'
+                    sh 'kubectl apply -f gym-service.yaml'
+                    sh 'kubectl apply -f gym-ingress.yaml'
                 }
             }
         }
@@ -21,7 +31,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployed at http://65.0.96.15.nip.io"
+            echo "✅ Deployed! Access the app at: http://65.0.96.15.nip.io"
+        }
+        failure {
+            echo "❌ Deployment failed. Please check the logs."
         }
     }
 }
