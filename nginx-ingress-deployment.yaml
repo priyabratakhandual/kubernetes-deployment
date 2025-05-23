@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ingress-nginx-controller-v2  # Renamed
+  name: ingress-nginx-controller-v2
   namespace: ingress-nginx
   labels:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/component: controller
-    app.kubernetes.io/version: v2  # Added version tag
+    app.kubernetes.io/version: v2
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: ingress-nginx
       app.kubernetes.io/component: controller
-      app.kubernetes.io/version: v2  # Must match pod template labels
+      app.kubernetes.io/version: v2
   template:
     metadata:
       labels:
@@ -35,7 +35,9 @@ spec:
             - --watch-namespace=ingress-nginx
           ports:
             - containerPort: 80
+              hostPort: 31080
             - containerPort: 443
+              hostPort: 31443
           env:
             - name: POD_NAME
               valueFrom:
