@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gym-website
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gym-website
+  template:
+    metadata:
+      labels:
+        app: gym-website
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker-node
+      containers:
+        - name: gym-website
+          image: priyabratakhandual/gym-react_mywebsite
+          ports:
+            - containerPort: 3000

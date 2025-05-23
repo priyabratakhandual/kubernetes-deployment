@@ -1,31 +1,27 @@
 pipeline {
     agent any
 
-    environment {
-        DEPLOY_YAML = 'deployment.yaml'
-        SERVICE_YAML = 'service.yaml'
-    }
-
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/priyabratakhandual/kubernetes-deployment.git'  // Replace with actual repo
+                git 'https://github.com/your/repo.git'
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh "kubectl apply -f ${DEPLOY_YAML}"
-                    sh "kubectl apply -f ${SERVICE_YAML}"  // Optional
+                    sh "kubectl apply -f gym-deployment.yaml"
+                    sh "kubectl apply -f gym-service.yaml"
+                    sh "kubectl apply -f gym-ingress.yaml"
                 }
             }
         }
+    }
 
-        stage('Check Deployment') {
-            steps {
-                sh 'kubectl get pods -o wide'
-            }
+    post {
+        success {
+            echo "✅ Deployed at http://65.0.96.15.nip.io"
         }
     }
 }
