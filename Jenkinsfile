@@ -16,7 +16,7 @@ pipeline {
                     sh 'sleep 5'
                     sh 'kubectl apply -f nginx-ingress-deployment.yaml'
                     sh 'kubectl apply -f nginx-ingress-service.yaml'
-                    sh 'kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx'
+                    sh 'kubectl rollout status deployment ingress-nginx-controller-v2 -n ingress-nginx'x
                 }
             }
         }
