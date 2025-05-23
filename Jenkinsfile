@@ -12,8 +12,11 @@ pipeline {
             steps {
                 script {
                     sh 'kubectl create namespace ingress-nginx || true'
+                    sh 'kubectl delete deployment ingress-nginx-controller -n ingress-nginx || true'
+                    sh 'sleep 5'
                     sh 'kubectl apply -f nginx-ingress-deployment.yaml'
                     sh 'kubectl apply -f nginx-ingress-service.yaml'
+                    sh 'kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx'
                 }
             }
         }
