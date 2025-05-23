@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: 3.110.45.98.nip.io  # Replace with your EC2 public IP
+    - host: 65.0.96.15.nip.io  # Replace with your EC2 public IP
       http:
         paths:
           - path: /
