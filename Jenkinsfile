@@ -8,6 +8,28 @@ pipeline {
             }
         }
 
+        stage('Grant Ingress RBAC Access') {
+            steps {
+                script {
+                    writeFile file: 'ingress-nginx-rbac.yaml', text: '''\
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ingress-nginx-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ingress-nginx
+    namespace: ingress-nginx
+'''
+                    sh 'kubectl apply -f ingress-nginx-rbac.yaml'
+                }
+            }
+        }
+
         stage('Install Ingress NGINX on Worker') {
             steps {
                 script {
@@ -16,7 +38,7 @@ pipeline {
                     sh 'sleep 5'
                     sh 'kubectl apply -f nginx-ingress-deployment.yaml'
                     sh 'kubectl apply -f nginx-ingress-service.yaml'
-                    sh 'kubectl rollout status deployment ingress-nginx-controller-v2 -n ingress-nginx'x
+                    sh 'kubectl rollout status deployment ingress-nginx-controller-v2 -n ingress-nginx'
                 }
             }
         }
