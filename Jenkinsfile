@@ -1,65 +1,36 @@
 pipeline {
-    agent any
+  agent any
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/priyabratakhandual/kubernetes-deployment.git'
-            }
-        }
+  environment {
+    KUBECONFIG = "/var/lib/jenkins/.kube/config"
+  }
 
-        stage('Grant Ingress RBAC Access') {
-            steps {
-                script {
-                    writeFile file: 'ingress-nginx-rbac.yaml', text: '''\
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: ingress-nginx-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-  - kind: ServiceAccount
-    name: ingress-nginx
-    namespace: ingress-nginx
-'''
-                    sh 'kubectl apply -f ingress-nginx-rbac.yaml'
-                }
-            }
-        }
-
-        stage('Install Ingress NGINX on Worker') {
-            steps {
-                script {
-                    sh 'kubectl create namespace ingress-nginx || true'
-                    sh 'kubectl delete deployment ingress-nginx-controller -n ingress-nginx || true'
-                    sh 'sleep 5'
-                    sh 'kubectl apply -f nginx-ingress-deployment.yaml'
-                    sh 'kubectl apply -f nginx-ingress-service.yaml'
-                    sh 'kubectl rollout status deployment ingress-nginx-controller-v2 -n ingress-nginx'
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    sh 'kubectl apply -f gym-deployment.yaml'
-                    sh 'kubectl apply -f gym-service.yaml'
-                    sh 'kubectl apply -f gym-ingress.yaml'
-                }
-            }
-        }
+  stages {
+    stage('Checkout Code') {
+      steps {
+        checkout scm
+      }
     }
 
-    post {
-        success {
-            echo "✅ Deployed! Access the app at: http://65.0.96.15.nip.io"
-        }
-        failure {
-            echo "❌ Deployment failed. Please check the logs."
-        }
+    stage('Deploy to Kubernetes') {
+      steps {
+        sh '''
+          echo "📦 Deploying to worker-node..."
+          kubectl apply -f deployment.yaml
+          kubectl apply -f service.yaml
+          kubectl apply -f ingress.yaml
+          echo "✅ Done deploying to worker-node."
+        '''
+      }
     }
+  }
+
+  post {
+    success {
+      echo '✅ Successfully deployed on worker-node.'
+    }
+    failure {
+      echo '❌ Deployment failed. Check Jenkins logs.'
+    }
+  }
 }
